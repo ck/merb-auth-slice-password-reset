@@ -1,7 +1,5 @@
 class MerbAuthSlicePasswordReset::Passwords <  MerbAuthSlicePasswordReset::Application
 
-  after :redirect_after_password_reset, :only => [:reset]
-
   def forgot_password
     @login_param_name = Merb::Authentication::Strategies::Basic::Base.login_param
     render
@@ -14,7 +12,7 @@ class MerbAuthSlicePasswordReset::Passwords <  MerbAuthSlicePasswordReset::Appli
       @user.send_password_reset_notification
       redirect_after_sending_confirmation
     else
-      message[:error] = "User with #{@login_param_name} \"%s\" not found".t(params[@login_param_name])
+      message[:error] = "User with #{@login_param_name} \"%s\" not found".t(params[@login_param_name].freeze)
       render :forgot_password
     end
   end
@@ -23,12 +21,13 @@ class MerbAuthSlicePasswordReset::Passwords <  MerbAuthSlicePasswordReset::Appli
     session.user = Merb::Authentication.user_class.find_with_password_reset_code(params[:password_reset_code])
     raise NotFound if session.user.nil?
     session.user.reset_password!
+    redirect_after_password_reset
   end
 
   private
 
   def redirect_after_password_reset
-    redirect "/", :message => {:notice => "Password Reset Successful".t}
+    redirect "/", :message => {:notice => "New password sent".t}
   end
   
   def redirect_after_sending_confirmation
