@@ -41,15 +41,20 @@ module Merb
         end # ClassMethods
 
         module InstanceMethods
-
+          
           def reset_password!
+            self.password = self.password_confirmation = Digest::SHA1.hexdigest( Time.now.to_s.split(//).sort_by {rand}.join )[0, 7]
+            self.save
+            send_new_password
+          end
+
+          def generate_password_reset_code
             pwreset_key_success = false
             until pwreset_key_success
               self.password_reset_code = self.class.make_key
               self.save
               pwreset_key_success = self.errors.on(:password_reset_code).nil? ? true : false 
             end
-            send_forgot_password
           end
 
           def password_reset?
@@ -64,16 +69,21 @@ module Merb
           # Sends out the password reset notification.
           # Used 'Request to change your password' as subject if +MaSFP[:password_reset_subject]+ is not set.
           def send_password_reset_notification
-            deliver_password_reset_email(:password_reset, :subject => (MaSFP[:password_reset_subject] || "Request to change your password"))
+            generate_password_reset_code
+            deliver_password_reset_email(:password_reset, :subject => (MaSPR[:password_reset_subject] || "Request to change your password"))
+          end
+          
+          def send_new_password
+            deliver_password_reset_email(:new_password, :subject => (MaSPR[:new_password_subject] || "Your new password"))
           end
 
           private
 
           # Helper method delivering the email.
           def deliver_password_reset_email(action, params)
-            from = MaSFP[:from_email]
+            from = MaSPR[:from_email]
             raise "No :from_email option set for Merb::Slices::config[:merb_auth_slice_password_reset][:from_email]" unless from
-            MaAS::ActivationMailer.dispatch_and_deliver(action, params.merge(:from => from, :to => self.email), :user => self)
+            MaSPR::PasswordResetMailer.dispatch_and_deliver(action, params.merge(:from => from, :to => self.email), :user => self)
           end
 
         end # InstanceMethods

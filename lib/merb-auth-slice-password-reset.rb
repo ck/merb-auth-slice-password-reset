@@ -2,10 +2,10 @@ if defined?(Merb::Plugins)
 
   $:.unshift File.dirname(__FILE__)
 
-  load_dependency 'merb-slices'
-  load_dependency 'merb-auth-core'
-  load_dependency 'merb-auth-more'
-  load_dependency 'merb-mailer'
+  dependency 'merb-slices'
+  dependency 'merb-auth-core'
+  dependency 'merb-auth-more'
+  dependency 'merb-mailer'
   require(File.expand_path(File.dirname(__FILE__) / "merb-auth-slice-password-reset" / "mixins") / "senile_user")
   
   Merb::Plugins.add_rakefiles "merb-auth-slice-password-reset/merbtasks", "merb-auth-slice-password-reset/slicetasks", "merb-auth-slice-password-reset/spectasks"
@@ -57,7 +57,9 @@ if defined?(Merb::Plugins)
     # @note prefix your named routes with :merb_auth_slice_password_reset_
     #   to avoid potential conflicts with global named routes.
     def self.setup_router(scope)
-      scope.match("/:password_reset_code").to(:controller => "passwords", :action => "reset").name(:reset_password)
+      scope.match("/reset_password/:password_reset_code").to(:controller => "passwords", :action => "reset").name(:reset_password)
+      scope.match("/forgot_password", :method => :get).to(:controller => "passwords", :action => "forgot_password").name(:forgot_password)
+      scope.match("/forgot_password", :method => :post).to(:controller => "passwords", :action => "send_confirmation")
     end
 
   end
