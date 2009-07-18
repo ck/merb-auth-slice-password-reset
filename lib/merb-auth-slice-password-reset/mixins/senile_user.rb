@@ -29,6 +29,9 @@ module Merb
             elsif defined?(Sequel) && ancestors.include?(Sequel::Model)
               require path / "sq_senile_user"
               extend(Merb::Authentication::Mixins::SenileUser::SQClassMethods)
+            elsif MongoMapper::Document > self
+              require path / "mm_senile_user"
+              extend(Merb::Authentication::Mixins::SenileUser::MMClassMethods)
             end
 
           end # base.class_eval
