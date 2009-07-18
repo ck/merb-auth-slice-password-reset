@@ -10,7 +10,7 @@ AUTHOR = "Daniel Neighman, Christian Kebekus"
 EMAIL = "has.sox@gmail.com"
 HOMEPAGE = "http://merbivore.com/"
 SUMMARY = "Merb Slice that adds basic password-reset functionality to merb-auth-based merb applications."
-GEM_VERSION = "0.9.13"
+GEM_VERSION = "0.9.14"
 
 spec = Gem::Specification.new do |s|
   s.rubyforge_project = 'merb'
